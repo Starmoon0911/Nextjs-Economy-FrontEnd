@@ -1,23 +1,12 @@
 "use client"
-
+import { useTheme } from "next-themes"
 import * as React from "react"
 import Link from "next/link"
-import { Menu, User } from "lucide-react"
-import { ModeToggle } from "@/components/ModeToggle"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
+import { NavMenu } from "../dropmeuns/Navmenu"
+import { UserDropMeun } from "../dropmeuns/User"
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+  const { setTheme } = useTheme()
 
   return (
     <nav className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 shadow-md">
@@ -26,42 +15,19 @@ export function Navbar() {
         <Link href="/" className="text-black dark:text-white">Logo</Link>
       </div>
 
-      {/* Hamburger Menu for small screens */}
-      <div className="flex items-center md:hidden">
-        <Button onClick={toggleMenu} variant="outline" size="icon">
-          <Menu className="h-5 w-5 text-black dark:text-white" />
-        </Button>
-      </div>
-
       {/* Links and Actions Section */}
-      <div className={`flex items-center space-x-4 ${isMenuOpen ? "flex-col absolute bg-white dark:bg-gray-900 shadow-md mt-2 rounded-lg p-4 md:hidden" : "hidden md:flex"}`}>
-        {/* Links */}
+      <div className={`items-center space-x-4 hidden md:flex`}>
         <Link href="/about" className="text-black dark:text-white hover:underline">About</Link>
         <Link href="/services" className="text-black dark:text-white hover:underline">Services</Link>
         <Link href="/contact" className="text-black dark:text-white hover:underline">Contact</Link>
 
-        {/* Dark Mode Toggle */}
-        <ModeToggle />
+        <UserDropMeun />
+      </div>
 
-        {/* User Avatar with Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="rounded-full p-2">
-              <User className="h-5 w-5 text-black dark:text-white" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Link href="/profile">Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/settings">Settings</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/logout">Logout</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Mobile Section: 按鈕放在同一行並對齊右邊 */}
+      <div className="flex items-center space-x-2 ml-auto md:hidden">
+        <UserDropMeun />
+        <NavMenu />
       </div>
     </nav>
   )
