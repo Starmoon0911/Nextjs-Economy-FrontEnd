@@ -1,34 +1,62 @@
+'use client';
+import { useState } from "react";
 import Link from "next/link";
-import { Home, Settings, BarChart } from "lucide-react";
+import { Home, Settings, BarChart, User, X, Menu } from "lucide-react";
 
 export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(true);
+
+  const handleIsOpen = () => { setIsOpen(!isOpen)}
   return (
-    <div className="w-64 bg-white shadow-md">
-      <div className="p-4">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div>
+      {/* 開啟按鈕 */}
+      {!isOpen && (
+        <button onClick={handleIsOpen} className="fixed top-4 left-4 p-2 bg-gray-200 rounded dark:bg-gray-600">
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
+
+      <div
+        className={`fixed  z-10 top-0 left-0 h-full transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full"
+          } bg-white shadow-md dark:bg-gray-700`}
+      >
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-2xl font-bold">{isOpen ? "Dashboard" : "D"}</h1>
+          <button onClick={handleIsOpen} className="p-2">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {isOpen && (
+          <nav className="mt-10">
+            <ul>
+              <li>
+                <Link href="/dashboard" className="flex items-center p-4 hover:bg-gray-200">
+                  <Home className="mr-3 h-5 w-5" />
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/user" className="flex items-center p-4 hover:bg-gray-200">
+                  <User className="mr-3 h-5 w-5" />
+                  User
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/stats" className="flex items-center p-4 hover:bg-gray-200">
+                  <BarChart className="mr-3 h-5 w-5" />
+                  Stats
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/settings" className="flex items-center p-4 hover:bg-gray-200">
+                  <Settings className="mr-3 h-5 w-5" />
+                  Settings
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        )}
       </div>
-      <nav className="mt-10">
-        <ul>
-          <li>
-            <Link href="/dashboard" className="flex items-center p-4 hover:bg-gray-200">
-              <Home className="mr-3 h-5 w-5" />
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link href="/dashboard/stats" className="flex items-center p-4 hover:bg-gray-200">
-              <BarChart className="mr-3 h-5 w-5" />
-              Stats
-            </Link>
-          </li>
-          <li>
-            <Link href="/dashboard/settings" className="flex items-center p-4 hover:bg-gray-200">
-              <Settings className="mr-3 h-5 w-5" />
-              Settings
-            </Link>
-          </li>
-        </ul>
-      </nav>
     </div>
   );
 }

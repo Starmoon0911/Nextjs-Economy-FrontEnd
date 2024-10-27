@@ -18,7 +18,7 @@ import { useTheme } from "next-themes"
 
 export function NavMenu() {
     return (
-        < div className="flex items-center" >
+        <div className="flex items-center" >
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">
@@ -32,8 +32,7 @@ export function NavMenu() {
                         <DropdownMenuItem>
                             <Link href="/">Home</Link>
                         </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                   
+                    </DropdownMenuGroup>    
                 </DropdownMenuContent>
             </DropdownMenu>
         </div >

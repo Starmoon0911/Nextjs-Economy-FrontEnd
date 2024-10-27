@@ -60,7 +60,7 @@ export function UserDropMeun() {
                         </DropdownMenuSub>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="bg-red-500">
+                    <DropdownMenuItem className="bg-red-500 text-white">
                         Log out
                     </DropdownMenuItem>
                 </DropdownMenuContent>
