@@ -1,49 +1,105 @@
 'use client'
-import React, { useRef } from "react"
-import Link from "next/link"
+import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
+import Lenis from "lenis"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { ArrowDown } from "lucide-react"
-import AboutUsProfile from "@/components/AbuoutUsProfile" // 引入 DeveloperProfile
-import ProductCard from "@/components/ProductCard"
+import { ArrowDown, ClipboardIcon, CheckIcon } from "lucide-react"
+import AboutUsProfile from "@/components/AbuoutUsProfile"
+gsap.registerPlugin(ScrollTrigger)
 
 export default function Home() {
-    const productSectionRef = useRef<HTMLDivElement>(null)
+    const heroSectionRef = useRef<HTMLDivElement>(null)
+    const aboutUsRef = useRef<HTMLDivElement>(null)
+    const copyRef = useRef<HTMLParagraphElement>(null)
+    const titleRef = useRef<HTMLHeadingElement>(null)
+    const infoButtonRef = useRef<HTMLAnchorElement>(null)
+    const verstionRef = useRef<HTMLParagraphElement>(null)
+    const ServerIP = "tech.alien-do.com".trim()
+    const [hasCopied, setHasCopied] = useState(false)
 
-    // 滾動動畫函數
-    const scrollToProducts = () => {
-        const targetPosition = productSectionRef.current?.offsetTop || 0;
-        const startPosition = window.pageYOffset;
-        const distance = targetPosition - startPosition;
-        const duration = 1000; // 滾動的總時間（毫秒）
-        let start: number | null = null;
+    // 初始化 Lenis 平滑滾動
+    useEffect(() => {
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => 1 - Math.pow(1 - t, 3),
+            smoothWheel: true,
+        })
 
-        const step = (timestamp: number) => {
-            if (!start) start = timestamp;
-            const progress = timestamp - start;
-            const scrollAmount = easeInOutCubic(progress, startPosition, distance, duration);
-            window.scrollTo(0, scrollAmount);
-            if (progress < duration) {
-                window.requestAnimationFrame(step);
+        const raf = (time: number) => {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf)
+
+        return () => lenis.destroy()
+    }, [])
+
+    // gsap 動畫效果
+    useEffect(() => {
+        // Hero Section 標題動畫
+        gsap.fromTo(
+            [titleRef.current,verstionRef.current],
+            { opacity: 0, y: 50 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 1.3,
+                delay:0.3,
+                scrollTrigger: {
+                    trigger: heroSectionRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse",
+                },
             }
-        };
+        )
 
-        window.requestAnimationFrame(step);
-    };
+        // 按鈕動畫（逐個顯示）
+        gsap.fromTo(
+            infoButtonRef.current,
+            { opacity: 0, y: 30 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 0.5,
+                scrollTrigger: {
+                    trigger: heroSectionRef.current,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse",
+                },
+            }
+        )
 
-    // 緩動函數 (easeInOutCubic)
-    const easeInOutCubic = (time: number, start: number, change: number, duration: number) => {
-        time /= duration / 2;
-        if (time < 1) return (change / 2) * time * time * time + start;
-        time -= 2;
-        return (change / 2) * (time * time * time + 2) + start;
-    };
+        gsap.fromTo(
+            copyRef.current,
+            { opacity: 0, y: 30 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 0.7,
+                scrollTrigger: {
+                    trigger: heroSectionRef.current,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse",
+                },
+            }
+        )
+    }, [])
+
+    // 複製文字功能
+    const copyText = () => {
+        navigator.clipboard.writeText(ServerIP)
+        setHasCopied(true)
+        setTimeout(() => setHasCopied(false), 2000)
+    }
 
     return (
         <div className="min-h-screen flex flex-col">
             {/* Hero Section */}
-            <section className="h-screen flex flex-col items-center justify-center relative bg-black">
+            <section ref={heroSectionRef} className="h-screen flex flex-col items-center justify-center relative bg-black">
                 <Image
                     src="/static/Background.png"
                     alt="Background"
@@ -51,77 +107,52 @@ export default function Home() {
                     objectFit="cover"
                     className="opacity-30"
                 />
-                <h1 className="text-5xl font-bold text-center text-white relative z-10">
-                    Welcome to Our Shop
+                <h1 ref={titleRef} className="text-7xl font-bold text-center text-white relative z-10">
+                    Aliendo Server
                 </h1>
+                <p
+                    ref={verstionRef}
+                    className="text-gray-400">版本1.21.x</p>
+                <div className="flex flex-inline space-x-4 items-center mt-4 z-10">
+                    <a
+                        ref={infoButtonRef}
+                        href="https://forum.gamer.com.tw/C.php?bsn=18673&snA=202949&subbsn=18&page=1&s_author=&gothis=1084538#1084538"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Button variant="default">更多資訊</Button>
+                    </a>
+                    <div className="flex items-center space-x-2">
+                        <p
+                            ref={copyRef}
+                            className="p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                            IP - {ServerIP}
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="relative z-10 h-6 w-6 text-zinc-50 hover:bg-zinc-700 hover:text-zinc-50"
+                                onClick={copyText}
+                            >
+                                {hasCopied ? <CheckIcon className="h-3 w-3" /> : <ClipboardIcon className="h-3 w-3 text-gray-600 dark:text-white" />}
+                                <span className="sr-only">Copy</span>
+                            </Button>
+                        </p>
+                    </div>
+                </div>
+
                 <button
-                    onClick={scrollToProducts}
+                    onClick={() => aboutUsRef.current?.scrollIntoView({ behavior: 'smooth' })}
                     className="mt-8 text-gray-800 dark:text-white hover:text-gray-600 dark:hover:text-gray-400 transition relative z-10"
                 >
                     <ArrowDown className="w-10 h-10 animate-bounce" />
                 </button>
             </section>
 
-            {/* Product List Section */}
-            <section ref={productSectionRef} className="bg-gray-50 dark:bg-gray-800 py-8">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/500"
-                            title="Stylish Chair"
-                            description="A comfortable and stylish chair perfect for your living room."
-                            price="$120.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Modern Sofa"
-                            description="A sleek and modern sofa for your home."
-                            price="$250.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Wooden Table"
-                            description="A solid wooden table with a natural finish."
-                            price="$180.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Lamp"
-                            description="A stylish and functional table lamp."
-                            price="$40.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Bookshelf"
-                            description="A spacious bookshelf for organizing your books."
-                            price="$90.00"
-                        />
-                    </div>
-
-                    <div className="flex justify-center mt-8">
-                        <Link href="/products">
-                            <Button variant="default">View More Products</Button>
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
             {/* About Us Section */}
-            <section className="py-16 bg-gray-100 dark:bg-gray-900">
+            <section ref={aboutUsRef} className="py-16 bg-gray-100 dark:bg-gray-900">
                 <div className="w-full px-4">
-                    <div>
-                        <AboutUsProfile
-                            avatarURL="/static/avatar.png"
-                            name="Developer 1"
-                            desc="The <Command /> component uses the cmdk component by pacocoursey."
-                        />
-                        <AboutUsProfile
-                            avatarURL="/static/avatar.png"
-                            name="Developer 1"
-                            desc="The <Command /> component uses the cmdk component by pacocoursey."
-                            right
-                        />
-                    </div>
+                    <AboutUsProfile avatarURL="/static/avatar.png" name="Developer 1" desc="The <Command /> component uses the cmdk component by pacocoursey." />
+                    <AboutUsProfile avatarURL="/static/avatar.png" name="Developer 2" desc="The <Command /> component uses the cmdk component by pacocoursey." right />
                 </div>
             </section>
         </div>

@@ -26,16 +26,7 @@ export function UserDropMeun() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                            <Link href="/profile">Profile</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Link href="/settings">Settings</Link>
-                        </DropdownMenuItem>
-                    </DropdownMenuGroup>
+                    <DropdownMenuLabel>選單ewe</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                         <DropdownMenuSub>
@@ -59,10 +50,6 @@ export function UserDropMeun() {
                             </DropdownMenuPortal>
                         </DropdownMenuSub>
                     </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="bg-red-500 text-white">
-                        Log out
-                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div >
