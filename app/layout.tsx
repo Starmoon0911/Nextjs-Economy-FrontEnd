@@ -3,7 +3,10 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/bar/nav";
 import BottomBar from "@/components/bar/bottom"
+import axios from 'axios';
 import { contactInfo, links, support } from '@/lib/BottomBarInfoExpmale'
+axios.defaults.baseURL = 'http://localhost:9000'
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
