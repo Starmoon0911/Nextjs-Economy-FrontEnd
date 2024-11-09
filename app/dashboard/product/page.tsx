@@ -10,6 +10,8 @@ import {
     Dialog,
     DialogTrigger,
     DialogContent,
+    DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
 
 function ProductList() {
@@ -37,7 +39,9 @@ function ProductList() {
                                     新增商品
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="max-h-[80vh] overflow-y-auto">
+                                <DialogTitle>新增商品</DialogTitle>
+                                <DialogDescription>請填寫商品資訊並提交。</DialogDescription>
                                 <NewProductForm />
                             </DialogContent>
                         </Dialog>

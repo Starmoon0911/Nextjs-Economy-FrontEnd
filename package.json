@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^3.1.0",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",
@@ -44,6 +47,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
+    "framer-motion": "^11.11.11",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.453.0",
     "next": "14.2.15",

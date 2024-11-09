@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { FileUploadArea } from '@/components/ui/FileUploadArea'
+import { FileUploader } from '@/components/ui/FileUploader'
 import {
     Form,
     FormControl,
@@ -17,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-// Define form validation schema
 const FormSchema = z.object({
     productName: z.string().min(1, { message: "商品名稱不可為空" }),
     productDescription: z.string().min(1, { message: "商品描述不可為空" }),
@@ -29,7 +28,8 @@ const FormSchema = z.object({
 })
 
 export function NewProductForm() {
-    const [productImage, setProductImage] = useState<File | null>(null); // State for the product image
+    const [productImages, setProductImages] = useState<File[]>([])
+    const [progresses, setProgresses] = useState<Record<string, number>>({})
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -39,19 +39,34 @@ export function NewProductForm() {
             productPrice: 0,
             productImage: "",
         },
-    });
+    })
 
-    // Function to handle the file upload
-    function handleFileUpload(files: File[]) {
-      
-        if (files.length > 0) {
-            setProductImage(files[0]); // Store the first uploaded file
-        }
-        console.log(productImage)
+    function handleUpload(files: File[]): Promise<void> {
+        setProductImages(files);
+        return new Promise((resolve) => {
+            files.forEach((file) => {
+                setProgresses((prev) => ({ ...prev, [file.name]: 0 }));
+                const interval = setInterval(() => {
+                    setProgresses((prev) => {
+                        const progress = (prev[file.name] || 0) + 10;
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            if (Object.values(prev).every((p) => p >= 100)) {
+                                resolve(); // Resolve promise once all files are "uploaded"
+                            }
+                            return { ...prev, [file.name]: 100 };
+                        }
+                        return { ...prev, [file.name]: progress };
+                    });
+                }, 200);
+            });
+        });
     }
 
+
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        console.log(data);
+        console.log(productImages)
+        console.log(data)
     }
 
     return (
@@ -59,7 +74,6 @@ export function NewProductForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <h2 className="text-lg font-bold">新增商品</h2>
 
-                {/* Product Name */}
                 <FormField
                     control={form.control}
                     name="productName"
@@ -75,17 +89,23 @@ export function NewProductForm() {
                     )}
                 />
 
-                {/* Product Image */}
                 <FormField
                     control={form.control}
                     name="productImage"
-                    render={({ field }) => (
+                    render={() => (
                         <FormItem>
                             <FormLabel>商品圖片</FormLabel>
                             <FormControl>
-                                <FileUploadArea 
-                                className={"bg-slate-300 text-gray-900 dark:bg-gray-800 dark:text-white"} 
-                                onFileUpload={handleFileUpload} />
+                                <FileUploader
+                                    value={productImages}
+                                    onValueChange={setProductImages}
+                                    onUpload={handleUpload}
+                                    progresses={progresses}
+                                    accept={{ "image/*": [] }}
+                                    maxFileCount={5}
+                                    multiple
+                                    className={"bg-slate-300 text-gray-900 dark:bg-gray-800 dark:text-white"}
+                                />
                             </FormControl>
                             <FormDescription>上傳商品的圖片</FormDescription>
                             <FormMessage />
@@ -93,7 +113,6 @@ export function NewProductForm() {
                     )}
                 />
 
-                {/* Product Description */}
                 <FormField
                     control={form.control}
                     name="productDescription"
@@ -109,7 +128,6 @@ export function NewProductForm() {
                     )}
                 />
 
-                {/* Product Price */}
                 <FormField
                     control={form.control}
                     name="productPrice"
@@ -122,8 +140,8 @@ export function NewProductForm() {
                                     placeholder="輸入價格"
                                     {...field}
                                     onChange={event => {
-                                        const value = +event.target.value;  // Convert value to a number
-                                        field.onChange(value);
+                                        const value = +event.target.value
+                                        field.onChange(value)
                                     }}
                                 />
                             </FormControl>
@@ -138,7 +156,7 @@ export function NewProductForm() {
                 </Button>
             </form>
         </Form>
-    );
+    )
 }
 
-export default NewProductForm;
+export default NewProductForm
