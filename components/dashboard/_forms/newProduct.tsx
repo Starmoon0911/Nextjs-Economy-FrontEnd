@@ -8,9 +8,7 @@ import { FileUploader } from '@/components/ui/FileUploader'
 import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:9000'
-
+import axios from '@/actions/axios'
 import {
     Form,
     FormControl,
@@ -107,12 +105,13 @@ export function NewProductForm() {
         });
         try {
             const response = await axios.post('/api/v1/product/create', formData, {
-
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             console.log('商品已新增:', response.data);
         } catch (error) {
-            console.error('新增商品時發生錯誤:', error);
+            console.error('新增商品時發生錯誤:', error || error);
         }
+        
     }
 
 
