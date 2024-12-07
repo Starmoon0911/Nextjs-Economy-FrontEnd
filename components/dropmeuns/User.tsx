@@ -14,9 +14,13 @@ import {
 import { Button } from "../ui/button"
 import { User } from "lucide-react"
 import Link from "next/link"
+
 import { useTheme } from "next-themes"
+import { useAuth } from "@/context/authContext"
 export function UserDropMeun() {
-    const { setTheme } = useTheme()
+    const { setTheme } = useTheme();
+    const { isLogged, logout } = useAuth();
+    console.log(isLogged)
     return (
         < div className="flex items-center" >
             <DropdownMenu>
@@ -28,14 +32,14 @@ export function UserDropMeun() {
                 <DropdownMenuContent className="w-56">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
+                    {/* <DropdownMenuGroup>
                         <DropdownMenuItem>
                             <Link href="/profile">Profile</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Link href="/settings">Settings</Link>
                         </DropdownMenuItem>
-                    </DropdownMenuGroup>
+                    </DropdownMenuGroup> */}
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                         <DropdownMenuSub>
@@ -51,19 +55,25 @@ export function UserDropMeun() {
                         </DropdownMenuSub>
 
                         <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>Language</DropdownMenuSubTrigger>
+                            {/* <DropdownMenuSubTrigger>Language</DropdownMenuSubTrigger>
                             <DropdownMenuPortal>
                                 <DropdownMenuSubContent>
                                     <DropdownMenuItem onClick={() => setTheme("dark")}>繁體中文</DropdownMenuItem>
                                 </DropdownMenuSubContent>
-                            </DropdownMenuPortal>
+                            </DropdownMenuPortal> */}
                         </DropdownMenuSub>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="bg-red-500 text-white">
-                        Log out
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
+                    {isLogged ? (
+                        <DropdownMenuItem onClick={() => logout()} className="bg-red-500 text-white">
+                            Log out
+                        </DropdownMenuItem>
+                    ) : (
+                        <DropdownMenuItem>
+                            <Link href={'/auth/login'}>Log in</Link>
+                        </DropdownMenuItem>
+                    )}
+                    </DropdownMenuContent>
             </DropdownMenu>
         </div >
     )

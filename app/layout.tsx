@@ -3,10 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/bar/nav";
 import BottomBar from "@/components/bar/bottom"
-import axios from 'axios';
+import { Toaster } from "@/components/ui/toaster";
 import { contactInfo, links, support } from '@/lib/BottomBarInfoExpmale'
-axios.defaults.baseURL = 'http://localhost:9000'
-
+import { AuthProvider } from "@/context/authContext";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -33,20 +32,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          {children}
-          <BottomBar
-            contactInfo={contactInfo}
-            links={links}
-            support={support}
-          />
-        </ThemeProvider>
+        <AuthProvider >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navbar />
+
+            {children}
+
+            <Toaster />
+            <BottomBar
+              contactInfo={contactInfo}
+              links={links}
+              support={support}
+            />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

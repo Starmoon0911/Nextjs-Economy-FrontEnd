@@ -43,7 +43,7 @@ const categoryOptions = [
     { value: 'books', label: '書籍' },
 ];
 
-export function NewProductForm() {
+export function NewProductForm({ setIsDialogOpen }: { setIsDialogOpen: (isOpen: boolean) => void }) {
     const [productImages, setProductImages] = useState<File[]>([])
     const [progresses, setProgresses] = useState<Record<string, number>>({})
     const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -94,7 +94,9 @@ async function onSubmit(data: z.infer<typeof FormSchema>) {
             tags: data.productTags,
             images: productImages,
         });
+        setIsDialogOpen(false); 
         console.log('商品已新增');
+        window.location.reload();
     } catch (error) {
         console.error('新增商品時發生錯誤:', error);
     }
