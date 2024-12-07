@@ -1,51 +1,116 @@
-import React from 'react';
-import { AspectRatio } from '@radix-ui/react-aspect-ratio';
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from '@radix-ui/react-dropdown-menu';
-import { MoreVertical } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MoreVertical } from "lucide-react";
+import getProducts from "@/actions/product/getProducts";
+
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+}
 
 interface ProductCardProps {
-  imageSrc: string;
-  title: string;
-  description: string;
-  price: string;
+  product: Product;
   admin?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ imageSrc, title, description, price, admin }) => {
-  return (
-    <div className="max-w-sm rounded overflow-hidden shadow-lg bg-white dark:bg-gray-900 flex flex-col h-full relative">
-      <AspectRatio ratio={16 / 9} className="relative">
-        <img className="object-cover w-full h-full" src={imageSrc} alt={title} />
-      </AspectRatio>
-      <div className="p-4 flex flex-col flex-grow">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{title}</h2>
-        <p className="text-gray-700 dark:text-gray-300 text-base mb-4 flex-grow">{description}</p>
-        <div className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-auto">{price}</div>
-      </div>
+const ProductCard: React.FC<ProductCardProps> = ({ product, admin }) => (
+  <div className="flex flex-col rounded-lg shadow-md bg-card text-card-foreground overflow-hidden min-w-[200px] max-w-sm h-full relative">
+    <AspectRatio ratio={16 / 9} className="relative">
+      <img
+        className="object-cover w-full h-full"
+        src={product.images[0]?.replace(/\\/g, "/")}
+        alt={product.name}
+      />
+    </AspectRatio>
+    <div className="p-4 flex flex-col flex-grow">
+      <h2 className="text-lg font-semibold">{product.name}</h2>
+      <p className="text-sm text-muted-foreground flex-grow mb-4">
+        {product.description}
+      </p>
+      <div className="text-base font-medium mt-auto">${product.price}</div>
+    </div>
+    {admin && (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-4"
+          >
+            <MoreVertical className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-32">
+          <DropdownMenuItem>編輯</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive">刪除</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )}
+  </div>
+);
 
-      {/* Admin dropdown menu */}
-      {admin && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-              <MoreVertical className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-20 bg-white p-2 dark:bg-gray-800 rounded-md shadow-lg transition-all duration-200">
-            <DropdownMenuSeparator className="my-1" />
-            <DropdownMenuItem className="px-4 py-2 cursor-pointer rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">編輯</DropdownMenuItem>
-            <DropdownMenuItem className="px-4 py-2  cursor-pointer rounded-sm hover:bg-red-500 dark:hover:bg-red-700 transition-colors">刪除</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+interface ProductListProps {
+  admin?: boolean;
+  limit?: number;
+}
+
+const ProductList: React.FC<ProductListProps> = ({ admin, limit }) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      const fetchedData = await getProducts({ limit });
+      setProducts(fetchedData.data || []);
+      setLoading(false);
+    }
+    fetchProducts();
+  }, [limit]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col rounded-lg shadow-md bg-card text-card-foreground overflow-hidden min-w-[200px] h-full relative"
+          >
+            <AspectRatio ratio={16 / 9}>
+              <Skeleton className="w-full h-full" />
+            </AspectRatio>
+            <div className="p-4 flex flex-col flex-grow">
+              <Skeleton className="h-6 w-[250px] mb-4" />
+              <Skeleton className="h-4 w-[200px] mb-2" />
+              <Skeleton className="h-6 w-[100px]" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {products.map((product) => (
+        <ProductCard key={product._id} product={product} admin={admin} />
+      ))}
     </div>
   );
 };
 
-export default ProductCard;
+export default ProductList;

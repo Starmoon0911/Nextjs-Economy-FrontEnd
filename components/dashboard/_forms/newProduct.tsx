@@ -8,7 +8,7 @@ import { FileUploader } from '@/components/ui/FileUploader'
 import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import axios from '@/actions/axios'
+import { createProductRequest } from '@/actions/dashboard/createProduct'
 import {
     Form,
     FormControl,
@@ -83,37 +83,22 @@ export function NewProductForm() {
         });
     }
 
-    async function onSubmit(data: z.infer<typeof FormSchema>) {
-
-        const formData = new FormData();
-        formData.append('name', data.productName);
-        formData.append('description', data.productDescription);
-        formData.append('price', data.productPrice.toString()); // 將 number 轉為 string
-        formData.append('category', data.productCategory.toString()); // 使用 selectedCategory
-        formData.append('stock', data.productStock.toString()); // 將 number 轉為 string
-        if (data.productTags) {
-            formData.append('tags', data.productTags);
-        }
-
-        // 將圖片加入 FormData
-        productImages.forEach((file) => {
-            formData.append('images', file); // 'images' 是後端期望接收的欄位名稱
+async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+        await createProductRequest({
+            name: data.productName,
+            description: data.productDescription,
+            price: data.productPrice,
+            category: selectedCategory,
+            stock: data.productStock,
+            tags: data.productTags,
+            images: productImages,
         });
-
-        formData.forEach((value, key) => {
-            console.log(key, value);
-        });
-        try {
-            const response = await axios.post('/api/v1/product/create', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            console.log('商品已新增:', response.data);
-        } catch (error) {
-            console.error('新增商品時發生錯誤:', error || error);
-        }
-        
+        console.log('商品已新增');
+    } catch (error) {
+        console.error('新增商品時發生錯誤:', error);
     }
-
+}
 
     return (
         <Form {...form}>

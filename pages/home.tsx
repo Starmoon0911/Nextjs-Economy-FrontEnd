@@ -62,50 +62,6 @@ export default function Home() {
                 </button>
             </section>
 
-            {/* Product List Section */}
-            <section ref={productSectionRef} className="bg-gray-50 dark:bg-gray-800 py-8">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/500"
-                            title="Stylish Chair"
-                            description="A comfortable and stylish chair perfect for your living room."
-                            price="$120.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Modern Sofa"
-                            description="A sleek and modern sofa for your home."
-                            price="$250.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Wooden Table"
-                            description="A solid wooden table with a natural finish."
-                            price="$180.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Lamp"
-                            description="A stylish and functional table lamp."
-                            price="$40.00"
-                        />
-                        <ProductCard
-                            imageSrc="https://via.placeholder.com/300"
-                            title="Bookshelf"
-                            description="A spacious bookshelf for organizing your books."
-                            price="$90.00"
-                        />
-                    </div>
-
-                    <div className="flex justify-center mt-8">
-                        <Link href="/products">
-                            <Button variant="default">View More Products</Button>
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
             {/* About Us Section */}
             <section className="py-16 bg-gray-100 dark:bg-gray-900">
                 <div className="w-full px-4">
