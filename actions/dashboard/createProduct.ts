@@ -7,6 +7,7 @@ interface CreateProductData {
     category: string;
     stock: number;
     tags?: string;
+    content: string;
     images: File[];
 }
 
@@ -17,6 +18,7 @@ export async function createProductRequest(data: CreateProductData): Promise<voi
     formData.append('price', data.price.toString());
     formData.append('category', data.category);
     formData.append('stock', data.stock.toString());
+    formData.append('content', data.content);
     if (data.tags) {
         formData.append('tags', data.tags);
     }

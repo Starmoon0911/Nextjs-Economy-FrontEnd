@@ -19,8 +19,8 @@ import { useTheme } from "next-themes"
 import { useAuth } from "@/context/authContext"
 export function UserDropMeun() {
     const { setTheme } = useTheme();
-    const { isLogged, logout } = useAuth();
-    console.log(isLogged)
+    const { isLogged, logout, user } = useAuth();
+    console.log(user)
     return (
         < div className="flex items-center" >
             <DropdownMenu>
@@ -30,7 +30,7 @@ export function UserDropMeun() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>My Account {user ? `| ${user.username}` : undefined}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {/* <DropdownMenuGroup>
                         <DropdownMenuItem>
@@ -73,7 +73,7 @@ export function UserDropMeun() {
                             <Link href={'/auth/login'}>Log in</Link>
                         </DropdownMenuItem>
                     )}
-                    </DropdownMenuContent>
+                </DropdownMenuContent>
             </DropdownMenu>
         </div >
     )

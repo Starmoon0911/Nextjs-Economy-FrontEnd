@@ -1,83 +1,139 @@
-'use client'
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import axios from '@/actions/axios'
-import { useEffect } from 'react'
+"use client";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import axios from "@/actions/axios";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
     isLogged: boolean;
     login: (email: string, password: string) => void;
     logout: () => void;
+    user: any;
+    register: (email: string, password: string, username: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isLogged, setIsLogged] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
-        const validateToken = async () => {
-            const token = localStorage.getItem('token');
-            const expTime = localStorage.getItem('expTime');
+        const validateTokenAndFetchUser = async () => {
+            const token = localStorage.getItem("token");
+            const expTime = localStorage.getItem("expTime");
 
             if (token) {
-                // 如果 expTime 存在，檢查是否超過 1 天
                 if (expTime) {
                     const expirationDate = new Date(expTime);
                     const now = new Date();
-
                     if (now.getTime() - expirationDate.getTime() <= 24 * 60 * 60 * 1000) {
                         setIsLogged(true);
+                        await validateAndFetchUser(token); // 驗證 Token 並獲取 User
                         return;
                     }
                 }
-                try {
-                    const response = await axios.post('/api/v1/auth/validate', { token: token });
-                    if (response.status === 200) {
-                        setIsLogged(true);
-                        localStorage.setItem('expTime', new Date().toISOString()); // 更新 expTime
-                    } else {
-                        logout();
-                    }
-                } catch (error) {
-                    logout(); // Token 無效則登出
-                }
+                await validateAndFetchUser(token); // 驗證 Token 並獲取 User
             }
         };
 
-        validateToken();
+        validateTokenAndFetchUser();
     }, []);
+
+    const validateAndFetchUser = async (token: string) => {
+        try {
+            // 驗證 token 並獲取 userId
+            const validateResponse = await axios.post("/api/v1/auth/validate", { token });
+            const userId = validateResponse.data.data?.userId;
+
+            if (userId) {
+                localStorage.setItem("expTime", new Date().toISOString());
+                await fetchUser(userId); // 根據 userId 獲取詳細資料
+                setIsLogged(true);
+            } else {
+                throw new Error("無法取得 userId");
+            }
+        } catch (error) {
+            console.error("Token 驗證失敗或過期:", error);
+            logout();
+        }
+    };
+
+    const fetchUser = async (userId: string) => {
+        try {
+            const response = await axios.get(`/api/v1/user/${userId}`);
+            if (response.data.data) {
+                const userData = response.data.data;
+                localStorage.setItem("user", JSON.stringify(userData));
+                setUser(userData);
+            }
+        } catch (error) {
+            console.error("取得用戶資料失敗:", error);
+        }
+    };
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await axios.post('/api/v1/auth/login', {
+            const response = await axios.post("/api/v1/auth/login", {
                 email,
                 password,
                 rememberMe: true,
             });
 
             if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('expTime', new Date().toISOString()); // 設置 expTime
-                window.location.href = '/'; // 登入成功後跳轉
+                const token = response.data.token;
+                localStorage.setItem("token", token);
+                localStorage.setItem("expTime", new Date().toISOString());
+                await validateAndFetchUser(token); // 驗證 Token 並獲取用戶資料
+                window.location.href = "/";
             }
-            setIsLogged(true);
-            return response.data.token;
-
         } catch (err: any) {
-            throw Error(err.response?.data?.message || '登入失敗，請稍後再試');
+            toast({
+                title: "登入失敗",
+                description: err.response?.data?.message || "登入失敗，請稍後再試",
+                variant: "default",
+            });
+            console.error(err);
+        }
+    };
 
+    const register = async (email: string, password: string, username: string) => {
+        try {
+            const response = await axios.post("/api/v1/auth/register", {
+                email,
+                password,
+                username,
+            });
+            if (response.status === 201) {
+                toast({
+                    title: "註冊成功",
+                    description: "註冊成功，請登入",
+                });
+                setTimeout(() => {
+                    window.location.href = "/auth/login";
+                }, 3000);
+            }
+        } catch (err: any) {
+            toast({
+                title: "註冊失敗",
+                description: err.response?.data?.message || "註冊失敗，請稍後再試",
+                variant: "default",
+            });
+            console.error(err);
         }
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('expTime');
+        localStorage.removeItem("token");
+        localStorage.removeItem("expTime");
+        localStorage.removeItem("user");
         setIsLogged(false);
+        setUser(null);
         window.location.reload();
     };
 
     return (
-        <AuthContext.Provider value={{ isLogged, login, logout }}>
+        <AuthContext.Provider value={{ user, isLogged, login, logout, register }}>
             {children}
         </AuthContext.Provider>
     );

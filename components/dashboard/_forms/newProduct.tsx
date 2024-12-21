@@ -25,16 +25,16 @@ const FormSchema = z.object({
     productImage: z.any(),
     productPrice: z
         .number()
-        .positive({ message: "價格必須為正數" })
-        .nonnegative({ message: "價格不能是負數" }),
+        .nonnegative({ message: "價格不能是負數" }), // 允許 0 或正數
     productCategory: z.string().min(1, { message: "商品類別不可為空" }),
     productStock: z
         .number()
         .int({ message: "庫存數量必須是整數" })
         .nonnegative({ message: "庫存數量不能是負數" }),
     productTags: z.string().optional(),
-})
-
+    content: z.string().min(1, { message: "商品內容不可為空" }), // 新增 content 驗證
+});
+    
 const categoryOptions = [
     { value: 'electronics', label: '電子產品' },
     { value: 'clothing', label: '服飾' },
@@ -58,6 +58,7 @@ export function NewProductForm({ setIsDialogOpen }: { setIsDialogOpen: (isOpen: 
             productCategory: selectedCategory, // 使用 selectedCategory
             productStock: 0,
             productTags: "",
+            content: "", // 新增 content 預設值
         },
     })
 
@@ -83,24 +84,25 @@ export function NewProductForm({ setIsDialogOpen }: { setIsDialogOpen: (isOpen: 
         });
     }
 
-async function onSubmit(data: z.infer<typeof FormSchema>) {
-    try {
-        await createProductRequest({
-            name: data.productName,
-            description: data.productDescription,
-            price: data.productPrice,
-            category: selectedCategory,
-            stock: data.productStock,
-            tags: data.productTags,
-            images: productImages,
-        });
-        setIsDialogOpen(false); 
-        console.log('商品已新增');
-        window.location.reload();
-    } catch (error) {
-        console.error('新增商品時發生錯誤:', error);
+    async function onSubmit(data: z.infer<typeof FormSchema>) {
+        try {
+            await createProductRequest({
+                name: data.productName,
+                description: data.productDescription,
+                price: data.productPrice,
+                category: selectedCategory,
+                stock: data.productStock,
+                tags: data.productTags,
+                content: data.content, // 新增 content
+                images: productImages,
+            });
+            setIsDialogOpen(false); 
+            console.log('商品已新增');
+            window.location.reload();
+        } catch (error) {
+            console.error('新增商品時發生錯誤:', error);
+        }
     }
-}
 
     return (
         <Form {...form}>
@@ -166,7 +168,7 @@ async function onSubmit(data: z.infer<typeof FormSchema>) {
                     name="productPrice"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>價格</FormLabel>
+                            <FormLabel>價格(0表免費)</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
@@ -252,6 +254,21 @@ async function onSubmit(data: z.infer<typeof FormSchema>) {
                                 <Input placeholder="輸入商品標籤" {...field} />
                             </FormControl>
                             <FormDescription>設定商品的標籤 (可選)</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>商品內容</FormLabel>
+                            <FormControl>
+                                <Textarea placeholder="輸入商品內容" {...field} />
+                            </FormControl>
+                            <FormDescription>輸入商品的內容（例如用途、功能、規格等）</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}

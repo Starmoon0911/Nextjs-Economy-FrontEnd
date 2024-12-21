@@ -114,7 +114,9 @@ function ProductList() {
                                 </CardContent>
                                 <CardFooter className="relative h-16 flex items-center justify-between">
                                     {/* 左側顯示價格 */}
-                                    <div className="text-lg font-medium">${product.price}</div>
+                                    <div className="text-lg font-medium">
+                                        {product.price === 0 ? 'FREE' : `$${product.price}`}
+                                    </div>
 
                                     {/* 右下角新增 DropdownMenu */}
                                     <DropdownMenu>

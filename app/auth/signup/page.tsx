@@ -4,22 +4,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/context/authContext';
 
-export default function SignInPage() {
+export default function RegisterPage() {
+    const { register } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
-    const handleSubmit = async (e: React.FormEvent) => {
+
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
         try {
-            await login(email, password); // 不需要檢查返回值
-            setLoading(false);
-        } catch (err: any) {
-            setError(err?.message || '登入失敗，請稍後再試');
+            await register(email, password, username);
+        } catch (err) {
+            setError('註冊失敗，請再試一次');
         } finally {
             setLoading(false);
         }
@@ -34,10 +35,23 @@ export default function SignInPage() {
 
             <div className="flex shadow-sm flex-col justify-center items-center w-1/2 p-8">
                 <div className="max-w-sm w-full space-y-6 p-8 bg-white bg-opacity-70 rounded-xl dark:bg-black">
-                    <h2 className="text-3xl text-black font-bold text-center dark:text-white">登入</h2>
+                    <h2 className="text-3xl text-black font-bold text-center dark:text-white">註冊</h2>
                     {error && <p className="text-red-500 text-center">{error}</p>}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleRegister} className="space-y-4">
+                        <div className="flex flex-col">
+                            <label className="text-black mb-2 dark:text-white" htmlFor="username">用戶名</label>
+                            <Input
+                                id="username"
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="請輸入用戶名"
+                                required
+                                className="w-full p-3 bg-white text-black rounded-md border border-gray-700 focus:ring-primary focus:border-primary dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                            />
+                        </div>
+
                         <div className="flex flex-col">
                             <label className="text-black mb-2 dark:text-white" htmlFor="email">電子郵件</label>
                             <Input
@@ -69,12 +83,12 @@ export default function SignInPage() {
                             disabled={loading}
                             className="w-full dark:text-white dark:bg-gray-700"
                         >
-                            {loading ? '登入中...' : '登入'}
+                            {loading ? '註冊中...' : '註冊'}
                         </Button>
                     </form>
 
                     <p className="text-sm text-black mt-4 text-center dark:text-white">
-                        還沒有帳號? <a href="/auth/signup" className="text-primary dark:text-primary">註冊</a>
+                        已有帳號? <a href="/auth/login" className="text-primary dark:text-primary">登入</a>
                     </p>
                 </div>
             </div>

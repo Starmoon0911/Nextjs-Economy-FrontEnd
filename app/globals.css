@@ -82,7 +82,11 @@ body {
     --chart-5: 340 75% 55%;
   }
 }
-
+.transparent-theme {
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+}
 @layer base {
   * {
     @apply border-border;
