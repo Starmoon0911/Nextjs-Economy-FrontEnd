@@ -16,7 +16,7 @@ import { User } from "lucide-react"
 import Link from "next/link"
 
 import { useTheme } from "next-themes"
-import { useAuth } from "@/context/authContext"
+import { useAuth } from "@/context/useAuth"
 export function UserDropMeun() {
     const { setTheme } = useTheme();
     const { isLogged, logout, user } = useAuth();

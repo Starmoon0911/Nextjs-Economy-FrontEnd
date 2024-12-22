@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/context/authContext';
+import { useAuth } from '@/context/useAuth';
 
 export default function SignInPage() {
     const [email, setEmail] = useState('');

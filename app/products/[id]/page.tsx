@@ -9,7 +9,7 @@ import { MdPreview } from 'md-editor-rt';
 import 'md-editor-rt/lib/style.css';
 import '@/app/globals.css';
 import { ProductPageProps } from '@/pages/product/[id]';
-import { useAuth } from '@/context/authContext';
+import { useAuth } from '@/context/useAuth';
 interface Product {
   _id: string;
   name: string;
@@ -38,6 +38,7 @@ const ProductPage = ({ productId_ }: ProductPageProps) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [productId, setProductId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isNotFound, setisNotFound] = useState<boolean>(false);
   const { user } = useAuth();
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -86,7 +87,7 @@ const ProductPage = ({ productId_ }: ProductPageProps) => {
     );
   }
 
-  if (!product) {
+  if (!product || isNotFound) {
     return <NotFound />;
   }
 

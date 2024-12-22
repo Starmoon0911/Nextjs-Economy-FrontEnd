@@ -5,7 +5,7 @@ import { Navbar } from "@/components/bar/nav";
 import BottomBar from "@/components/bar/bottom"
 import { Toaster } from "@/components/ui/toaster";
 import { contactInfo, links, support } from '@/lib/BottomBarInfoExpmale'
-import { AuthProvider } from "@/context/authContext";
+import { AuthProvider } from "@/context/useAuth";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
