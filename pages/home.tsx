@@ -114,11 +114,9 @@ export default function Home() {
               <Card key={product._id} className="bg-card shadow-lg max-w-[260px] min-h-[270px]">
                 <CardHeader className="-m-6">
                   <div className="aspect-w-16 aspect-h-9">
-                    <Image
+                    <img
                       src={product.images[0] ? `${process.env.NEXT_PUBLIC_BackEndURL}${product.images?.[0]?.replace(/\\/g, '/')} ` : `${process.env.NEXT_PUBLIC_BackEndURL}/upload/default/NoImage.jpg`}
                       alt={product.name}
-                      width={300}
-                      height={200}
                       className="object-cover w-full h-[200px] rounded-lg"
                     />
                   </div>
