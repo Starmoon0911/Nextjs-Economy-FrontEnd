@@ -22,7 +22,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         const validateTokenAndFetchUser = async () => {
-            const token = Cookies.get("token"); // 從 cookie 讀取 token
+            const token = localStorage.getItem("token");
             const expTime = localStorage.getItem("expTime");
 
             if (token) {
@@ -85,8 +85,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (response.data.token) {
                 const token = response.data.token;
                 const expTime = new Date().toISOString();
-                
-                Cookies.set("token", token, { expires: 7 }); // 將 token 儲存到 cookie，並設定 7 天過期時間
+                localStorage.setItem("token", token);
                 localStorage.setItem("expTime", expTime);
                 await validateAndFetchUser(token); // 驗證 Token 並獲取用戶資料
                 window.location.href = "/";
@@ -128,7 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const logout = () => {
-        Cookies.remove("token"); // 從 cookie 移除 token
+        localStorage.removeItem("token");
         localStorage.removeItem("expTime");
         localStorage.removeItem("user");
         setIsLogged(false);
