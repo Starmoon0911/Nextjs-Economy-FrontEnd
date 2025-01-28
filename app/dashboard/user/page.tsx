@@ -12,6 +12,7 @@ export default function UserSetting() {
     email: string;
     missingProducts: number;
     role?: string;
+    balance: number;
   }
   const [user, setUser] = useState<userProps[]>([]);
 
@@ -29,6 +30,7 @@ export default function UserSetting() {
               id: user.id,
               permission: user.role === "admin" ? "admin" : "customer",  // 確保類型安全
               email: user.email,
+              balance: user.balance,
               missingProducts: userOrders?.data?.length || 0,
             };
           })

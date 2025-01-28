@@ -42,7 +42,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  
+
 } from "@/components/ui/dialog"
 import { useState } from "react"
 import axios from '@/actions/axios'
@@ -52,8 +52,8 @@ export type User = {
   email: string
   missingProducts: number
   permission: "customer" | "admin"
+  balance: number // 新增金錢欄位
 }
-
 interface DataTableProps {
   data: User[]
 }
@@ -118,6 +118,78 @@ export const DataTable: React.FC<DataTableProps> = ({ data = [] }) => {
       },
     },
     {
+      accessorKey: "balance", // 修改這裡
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          金錢
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const [editing, setEditing] = React.useState(false);
+        const [money, setMoney] = React.useState(row.getValue<number>("balance")); // 修改這裡
+        const updateMoney = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            // 添加 Authorization 標頭  
+            await axios.post(
+              `/api/v1/user/updateMoney`,
+              { userId: row.original.id, balance: money }, // 請求體
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`, // 正確位置
+                },
+              }
+            );
+
+            const newData = [...tableData]
+            newData[row.index].balance = money as number;
+            setTableData(newData)
+            toast({
+              title: "金錢已更新",
+              description: "金錢已成功更新",
+            });
+            setEditing(false); // 結束編輯模式
+          } catch (error) {
+            console.error('Failed to update money:', error);
+            toast({
+              title: "更新失敗",
+              description: "請檢查網路連線或稍後再試",
+            });
+          }
+        };
+        //todo: unfocus when click outside
+        return editing ? (
+          <div className="flex items-center">
+            <Input
+              type="number"
+              value={money}
+              
+              onChange={(e) => setMoney(Number(e.target.value))}
+              className="max-w-xs"
+            />
+            <Button variant="outline"  onClick={updateMoney}>
+              確定
+            </Button>
+            <Button variant="outline" onClick={() => setEditing(false)}>
+              取消
+            </Button>
+          </div>
+        ) : (
+          <div
+            className="cursor-pointer"
+            onClick={() => setEditing(true)}
+          >
+            ${`${money}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          </div>
+        );
+      },
+    },
+
+    {
       accessorKey: "permission",
       header: ({ column }) => (
         <Button
@@ -158,7 +230,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data = [] }) => {
                       try {
                         const token = localStorage.getItem('token');
 
-                       await axios.post(
+                        await axios.post(
                           '/api/v1/user/changerole',
                           {
                             id: row.original.id,

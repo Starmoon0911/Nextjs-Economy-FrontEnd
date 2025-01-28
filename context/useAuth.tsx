@@ -2,8 +2,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import axios from "@/actions/axios";
 import { useToast } from "@/hooks/use-toast";
-import Cookies from "js-cookie"; // 引入 js-cookie
-
 interface AuthContextType {
     isLogged: boolean;
     login: (email: string, password: string) => void;
