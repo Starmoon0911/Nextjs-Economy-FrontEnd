@@ -115,7 +115,7 @@ export default function Home() {
                 <CardHeader className="-m-6">
                   <div className="aspect-w-16 aspect-h-9">
                     <img
-                      src={product.images[0] ? `${process.env.NEXT_PUBLIC_BackEndURL}${product.images?.[0]?.replace(/\\/g, '/')} ` : `${process.env.NEXT_PUBLIC_BackEndURL}/upload/default/NoImage.jpg`}
+                      src={product.images[0] ? `${process.env.NEXT_PUBLIC_BackEndURL}${product.images?.[0]?.replace(/\\/g, '/')} : `${process.env.NEXT_PUBLIC_BackEndURL}/upload/default/NoImage.jpg`}
                       alt={product.name}
                       className="object-cover w-full h-[200px] rounded-lg"
                     />
