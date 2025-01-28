@@ -20,7 +20,6 @@ import { useAuth } from "@/context/useAuth"
 export function UserDropMeun() {
     const { setTheme } = useTheme();
     const { isLogged, logout, user } = useAuth();
-    console.log(user)
     return (
         < div className="flex items-center" >
             <DropdownMenu>
@@ -64,6 +63,9 @@ export function UserDropMeun() {
                         </DropdownMenuSub>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => window.location.href = '/orders'}>
+                            購物車
+                        </DropdownMenuItem>
                     {isLogged ? (
                         <DropdownMenuItem onClick={() => logout()} className="bg-red-500 text-white">
                             Log out

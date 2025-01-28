@@ -16,6 +16,7 @@ import {
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import DeleteUser from "@/actions/user/deleteUser"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -34,11 +35,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  
+} from "@/components/ui/dialog"
+import { useState } from "react"
+import axios from '@/actions/axios'
+import { useToast } from "@/hooks/use-toast"
 export type User = {
   id: string
-  status: "verified" | "unverified"
   email: string
+  missingProducts: number
   permission: "customer" | "admin"
 }
 
@@ -46,18 +58,18 @@ interface DataTableProps {
   data: User[]
 }
 
-export const DataTable: React.FC<DataTableProps> = ({ data }) => {
-  const [tableData, setTableData] = React.useState<User[]>(data)
-
+export const DataTable: React.FC<DataTableProps> = ({ data = [] }) => {
+  const [tableData, setTableData] = React.useState<User[]>(data);
+  const { toast } = useToast();
+  React.useEffect(() => {
+    setTableData(data); // 當 data 更新時同步更新 tableData
+  }, [data]);
   const columns: ColumnDef<User>[] = [
     {
       id: "select",
       header: ({ table }) => (
         <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
@@ -73,30 +85,6 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
       enableHiding: false,
     },
     {
-      accessorKey: "status",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted()
-            if (currentSort === "asc") {
-              column.toggleSorting(false) // 降序
-            } else if (currentSort === "desc") {
-              column.clearSorting() // 清除排序
-            } else {
-              column.toggleSorting(true) // 升序
-            }
-          }}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("status")}</div>
-      ),
-    },
-    {
       accessorKey: "email",
       header: ({ column }) => (
         <Button
@@ -108,6 +96,26 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
         </Button>
       ),
       cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    },
+    {
+      accessorKey: "missingProducts",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          代發貨(個)
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const missingProducts: number = row.getValue("missingProducts")
+        if (missingProducts === 0) {
+          return <div className="text-green-400">{missingProducts}</div>
+        } else {
+          return <div className="text-red-400">{missingProducts}</div>
+        }
+      },
     },
     {
       accessorKey: "permission",
@@ -146,9 +154,54 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                 <DropdownMenuItem
                   key={perm}
                   onClick={() => {
-                    const newData = [...tableData]
-                    newData[row.index].permission = perm as "customer" | "admin"
-                    setTableData(newData)
+                    async function onChangeRole() {
+                      try {
+                        const token = localStorage.getItem('token');
+
+                       await axios.post(
+                          '/api/v1/user/changerole',
+                          {
+                            id: row.original.id,
+                            role: perm
+                          },
+                          {
+                            headers: {
+                              Authorization: `Bearer ${token}`
+                            }
+                          }
+                        );
+                        const newData = [...tableData]
+                        newData[row.index].permission = perm as "customer" | "admin"
+                        setTableData(newData)
+                        toast({
+                          title: "權限已更新",
+                          description: "權限已成功更新",
+                        });
+                      } catch (error) {
+                        if (error.response) {
+                          if (error.response.status === 401) {
+                            toast({
+                              title: "401: 權限不足",
+                              description: "嘗試檢查登入狀態或確保你有這權限",
+                            });
+                          } else {
+                            toast({
+                              title: `錯誤: ${error.response.status}`,
+                              description: error.response.data?.message || "發生未知錯誤",
+                            });
+                          }
+                        } else {
+                          toast({
+                            title: "更新失敗",
+                            description: "請檢查網路連線或稍後再試",
+                          });
+                        }
+
+                        console.error('Failed to change role:', error);
+                      }
+
+                    }
+                    onChangeRole()
                   }}
                 >
                   {perm}
@@ -180,10 +233,9 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                 Copy user ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>View user</DropdownMenuItem>
-              <DropdownMenuItem>View user details</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDeleteUser(user.id)} className="bg-red-600">Delete user</DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu >
         )
       },
     },
@@ -211,6 +263,26 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
       rowSelection,
     },
   })
+
+  const [openDialog, setOpenDialog] = useState(false); // Dialog 開關狀態
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null); // 儲存選中的使用者 ID
+
+  const handleDeleteUser = (userId: string) => {
+    setSelectedUserId(userId);
+    setOpenDialog(true); // 顯示確認視窗
+  };
+
+  const confirmDelete = async () => {
+    if (selectedUserId) {
+      await DeleteUser(selectedUserId); // 執行刪除操作
+      setTableData(tableData.filter((user) => user.id !== selectedUserId)); // 更新表格數據
+      setOpenDialog(false); // 關閉確認視窗
+    }
+  };
+
+  const cancelDelete = () => {
+    setOpenDialog(false); // 取消操作，關閉確認視窗
+  };
 
   return (
     <div className="w-full">
@@ -258,9 +330,9 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -297,6 +369,27 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
           </TableBody>
         </Table>
       </div>
+
+      {/* 確認刪除 Dialog */}
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>確認刪除</DialogTitle>
+            <DialogDescription>
+              您確定要刪除這個使用者嗎？這個操作無法撤回。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={cancelDelete}>
+              取消
+            </Button>
+            <Button className="bg-red-600" onClick={confirmDelete}>
+              確認刪除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}

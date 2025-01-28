@@ -1,7 +1,7 @@
 'use client';
 import { useState } from "react";
 import Link from "next/link";
-import { Home, Settings, BarChart, User, X, Menu } from "lucide-react";
+import { Home, User, X, Menu,ShoppingBag,Tag } from "lucide-react";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,15 +42,15 @@ export default function Sidebar() {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/stats" className="flex items-center p-4 hover:bg-gray-200">
-                  <BarChart className="mr-3 h-5 w-5" />
-                  Stats
+                <Link href="/dashboard/order" className="flex items-center p-4 hover:bg-gray-200">
+                  <ShoppingBag className="mr-3 h-5 w-5" />
+                  Order
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/settings" className="flex items-center p-4 hover:bg-gray-200">
-                  <Settings className="mr-3 h-5 w-5" />
-                  Settings
+                <Link href="/dashboard/product" className="flex items-center p-4 hover:bg-gray-200">
+                  <Tag className="mr-3 h-5 w-5" />
+                  Products
                 </Link>
               </li>
             </ul>

@@ -9,13 +9,9 @@ interface BottomBarProps {
         title: string;
         items: { label: string; url: string }[];
     }[];
-    support: {
-        title: string;
-        items: { label: string; url: string }[];
-    };
 }
 
-const BottomBar: React.FC<BottomBarProps> = ({ contactInfo, links, support }) => {
+const BottomBar: React.FC<BottomBarProps> = ({ contactInfo, links }) => {
     return (
         <footer className="dark:bg-gray-800 text-white py-6">
             <div className="container mx-auto px-4">
@@ -40,21 +36,12 @@ const BottomBar: React.FC<BottomBarProps> = ({ contactInfo, links, support }) =>
                         </div>
                     ))}
 
-                    <div className="mb-4 w-full sm:w-auto">
-                        <h2 className="text-black text-lg font-semibold dark:text-white">{support.title}</h2>
-                        <ul className="list-disc list-inside">
-                            {support.items.map((link, linkIndex) => (
-                                <li key={linkIndex}>
-                                    <a href={link.url} className="hover:underline text-gray-600 dark:text-gray-300">{link.label}</a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                   
                 </div>
 
                 {/* 版權信息 */}
                 <div className="text-center text-gray-400 mt-6">
-                    <p>© {new Date().getFullYear()} 你的公司名稱. 保留所有權利.</p>
+                    <p>© {new Date().getFullYear()} AlienTeam. 保留所有權利.</p>
                 </div>
             </div>
         </footer>

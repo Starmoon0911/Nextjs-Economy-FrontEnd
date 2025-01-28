@@ -1,12 +1,9 @@
 import { GetServerSideProps } from 'next';
 import ProductPage from '@/app/products/[id]/page';
 
-export interface ProductPageProps {
-  productId_: string;
-}
 
-const ProductPageWrapper = ({ productId_ }: ProductPageProps) => {
-  return <ProductPage productId_={productId_} />;
+const ProductPageWrapper = () => {
+  return <ProductPage />;
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

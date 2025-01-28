@@ -1,11 +1,13 @@
+
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/bar/nav";
 import BottomBar from "@/components/bar/bottom"
 import { Toaster } from "@/components/ui/toaster";
-import { contactInfo, links, support } from '@/lib/BottomBarInfoExpmale'
+import { contactInfo, links } from '@/lib/BottomBarInfo'
 import { AuthProvider } from "@/context/useAuth";
+import { ProductProvider } from "@/context/useProduct";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -32,26 +34,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Navbar />
+          <AuthProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              <Navbar />
+              <ProductProvider>
+                {children}
+              </ProductProvider>
+              <Toaster />
+              <BottomBar contactInfo={contactInfo} links={links} />
+            </ThemeProvider>
+          </AuthProvider>
 
-            {children}
 
-            <Toaster />
-            <BottomBar
-              contactInfo={contactInfo}
-              links={links}
-              support={support}
-            />
-          </ThemeProvider>
-        </AuthProvider>
       </body>
-    </html>
+    </html >
   );
 }

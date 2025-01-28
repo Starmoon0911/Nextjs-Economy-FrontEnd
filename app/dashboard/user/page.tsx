@@ -1,19 +1,50 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataTable } from '@/components/dashboard/UserSettingTable';
 import { CreateNewDashboardPage } from '@/components/dashboard/CreateNewDashboardPage';
 import { Page } from '@/components/dashboard/Page';
+import axios from '@/actions/axios';
 
 export default function UserSetting() {
-  const [LogoValue, setLogoValue] = useState('Logo');
+  interface userProps {
+    id: string;
+    permission: "customer" | "admin";  // 修改這裡
+    email: string;
+    missingProducts: number;
+    role?: string;
+  }
+  const [user, setUser] = useState<userProps[]>([]);
 
-  const paymentData = [
-    { id: "m5gr84i9", permission: "admin", status: "verified" as const, email: "ken99@yahoo.com" },
-    { id: "3u1reuv4", permission: "customer", status: "unverified" as const, email: "Abe45@gmail.com" },
-    { id: "derv1ws0", permission: "customer", status: "unverified" as const, email: "Monserrat44@gmail.com" },
-    { id: "5kma53ae", permission: "customer", status: "unverified" as const, email: "Silas22@gmail.com" },
-    { id: "bhqecj4p", permission: "customer", status: "verified" as const, email: "carmella@hotmail.com" },
-  ]
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        // 請求用戶資料
+        const response = await axios.get('/api/v1/user/');
+        const users = response.data.data; // 假設 `response.data.data` 是一個用戶陣列
+
+        const enrichedUsers = await Promise.all(
+          users.map(async (user:userProps) => {
+            const userOrders = await axios.get(`/api/v1/order/getUserOrder?id=${user.id}`);
+            return {
+              id: user.id,
+              permission: user.role === "admin" ? "admin" : "customer",  // 確保類型安全
+              email: user.email,
+              missingProducts: userOrders?.data?.length || 0,
+            };
+          })
+        );
+
+        // 設定用戶資料
+        console.log(enrichedUsers)
+        setUser(enrichedUsers);
+
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <CreateNewDashboardPage>
@@ -21,13 +52,7 @@ export default function UserSetting() {
         title="使用者列表"
         desc="這裡可以管理使用者😄"
       >
-        <DataTable data={paymentData} />
-        {/* Save button
-        <div className="pt-4">
-          <Button className="bg-blue-600 hover:bg-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600 text-white">
-            Save changes
-          </Button>
-        </div> */}
+        <DataTable data={user as userProps[]} />
       </Page>
     </CreateNewDashboardPage>
   );

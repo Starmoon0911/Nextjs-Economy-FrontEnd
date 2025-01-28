@@ -14,8 +14,9 @@ export default function RegisterPage() {
     const handleRegister = async () => {
         try {
             await register(email, password, username);
-        } catch (err) {
+        } catch (error) {
             setError('註冊失敗，請再試一次');
+            console.error(error);
         }
     };
 

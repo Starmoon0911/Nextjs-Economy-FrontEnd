@@ -1,4 +1,14 @@
-const supportInfo = {
+interface SupportPlan {
+    displayName: string;
+    price: number;
+    maxHomePoint: number;
+    maxResCount: number;
+    canUseBack: boolean;
+    useEC: boolean;
+    nick: boolean;
+    more?: boolean;  // 加上 ? 表示這個屬性是可選的
+}
+const supportInfo: Record<string, SupportPlan> = {
     "Player": {
         "displayName": "玩家",
         "price": 0,
@@ -36,7 +46,7 @@ const supportInfo = {
         "canUseBack": true,
         "useEC": true,
         "nick": true,
-        "more":true
+        "more": true
     },
 
     "VIP4": {
@@ -47,7 +57,7 @@ const supportInfo = {
         "canUseBack": true,
         "useEC": true,
         "nick": true,
-        "more":true
+        "more": true
     },
 
     "VIP5": {
@@ -58,7 +68,7 @@ const supportInfo = {
         "canUseBack": true,
         "useEC": true,
         "nick": true,
-        "more":true
+        "more": true
     }
 }
 export default supportInfo

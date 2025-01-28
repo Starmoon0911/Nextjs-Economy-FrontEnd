@@ -28,8 +28,13 @@ export async function createProductRequest(data: CreateProductData): Promise<voi
     });
 
     try {
+        const token = localStorage.getItem('token');
         const response = await axios.post('/api/v1/product/create', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            },
+
         });
         console.log('商品已新增:', response.data);
     } catch (error) {

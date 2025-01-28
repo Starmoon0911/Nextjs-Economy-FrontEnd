@@ -1,7 +1,8 @@
-"use client";
+'use client'
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import axios from "@/actions/axios";
 import { useToast } from "@/hooks/use-toast";
+import Cookies from "js-cookie"; // 引入 js-cookie
 
 interface AuthContextType {
     isLogged: boolean;
@@ -9,6 +10,7 @@ interface AuthContextType {
     logout: () => void;
     user: any;
     register: (email: string, password: string, username: string) => void;
+    fetchUser: (userId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,7 +22,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         const validateTokenAndFetchUser = async () => {
-            const token = localStorage.getItem("token");
+            const token = Cookies.get("token"); // 從 cookie 讀取 token
             const expTime = localStorage.getItem("expTime");
 
             if (token) {
@@ -61,7 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const fetchUser = async (userId: string) => {
         try {
-            const response = await axios.get(`/api/v1/user/${userId}`);
+            const response = await axios.get(`/api/v1/user?id=${userId}`);
             if (response.data.data) {
                 const userData = response.data.data;
                 localStorage.setItem("user", JSON.stringify(userData));
@@ -82,8 +84,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (response.data.token) {
                 const token = response.data.token;
-                localStorage.setItem("token", token);
-                localStorage.setItem("expTime", new Date().toISOString());
+                const expTime = new Date().toISOString();
+                
+                Cookies.set("token", token, { expires: 7 }); // 將 token 儲存到 cookie，並設定 7 天過期時間
+                localStorage.setItem("expTime", expTime);
                 await validateAndFetchUser(token); // 驗證 Token 並獲取用戶資料
                 window.location.href = "/";
             }
@@ -124,7 +128,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const logout = () => {
-        localStorage.removeItem("token");
+        Cookies.remove("token"); // 從 cookie 移除 token
         localStorage.removeItem("expTime");
         localStorage.removeItem("user");
         setIsLogged(false);
@@ -133,7 +137,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLogged, login, logout, register }}>
+        <AuthContext.Provider value={{ user, isLogged, login, logout, register, fetchUser }}>
             {children}
         </AuthContext.Provider>
     );

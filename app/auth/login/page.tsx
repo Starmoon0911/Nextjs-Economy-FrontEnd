@@ -10,6 +10,7 @@ export default function SignInPage() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -18,8 +19,12 @@ export default function SignInPage() {
         try {
             await login(email, password); // 不需要檢查返回值
             setLoading(false);
-        } catch (err: any) {
-            setError(err?.message || '登入失敗，請稍後再試');
+        } catch (err: unknown) {  // 將 err 設為 unknown
+            if (err instanceof Error) {  // 檢查 err 是否為 Error 類型
+                setError(err.message || '登入失敗，請稍後再試');
+            } else {
+                setError('登入失敗，請稍後再試');
+            }
         } finally {
             setLoading(false);
         }

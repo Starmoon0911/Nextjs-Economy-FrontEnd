@@ -21,6 +21,7 @@ export default function RegisterPage() {
             await register(email, password, username);
         } catch (err) {
             setError('註冊失敗，請再試一次');
+            console.error(err);
         } finally {
             setLoading(false);
         }

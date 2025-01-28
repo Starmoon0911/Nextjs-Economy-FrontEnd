@@ -90,7 +90,7 @@ export function NewProductForm({ setIsDialogOpen }: { setIsDialogOpen: (isOpen: 
                 name: data.productName,
                 description: data.productDescription,
                 price: data.productPrice,
-                category: selectedCategory,
+                category: 'beauty',
                 stock: data.productStock,
                 tags: data.productTags,
                 content: data.content, // 新增 content

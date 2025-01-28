@@ -24,11 +24,17 @@ import {
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { EllipsisVertical } from 'lucide-react'; // 使用適當的圖標庫
-
+interface Product {
+    _id: string;
+    name: string;
+    description: string;
+    price: number;
+    images: string[];
+}
 function ProductList() {
     const [confirmButtonVisibility, setConfirmButtonVisibility] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [products, setProducts] = useState<any[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const { toast } = useToast();
     useEffect(() => {
         const fetchProducts = async () => {
@@ -39,11 +45,12 @@ function ProductList() {
         fetchProducts();
     }, []);
 
-    useEffect(() => {
-        setTimeout(() => {
-            setConfirmButtonVisibility(true);
-        }, 3000);
-    }, []);
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         setConfirmButtonVisibility(true);
+    //     }, 3000);
+    // }, []);
+
     const handleDelete = async (productId: string) => {
         const result = await deleteProductRequest(productId);
 
@@ -95,7 +102,11 @@ function ProductList() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-12">
                         {products.map((product) => (
-                            <Card key={product._id} className="bg-card shadow-lg min-h-[270px]">
+                            <Card
+                                onClick={() => {
+                                    window.location.href = `/products/${product._id}`;
+                                }}
+                                key={product._id} className="bg-card shadow-lg min-h-[270px]">
                                 <CardHeader className="-m-6">
                                     {/* 移除內部 padding */}
                                     <AspectRatio ratio={16 / 9}>
