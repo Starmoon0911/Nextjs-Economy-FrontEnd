@@ -62,11 +62,13 @@ export default function UserSetting() {
 
   return (
     <CreateNewDashboardPage>
-      <Page
-        title="使用者列表"
-        desc="這裡可以管理使用者😄"
-      >
-        <DataTable data={user as userProps[]} />
+      <Page title="使用者列表" desc="這裡可以管理使用者😄">
+        {/* 手機模式可滑動 */}
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-max">
+            <DataTable data={user as userProps[]} />
+          </div>
+        </div>
       </Page>
     </CreateNewDashboardPage>
   );
