@@ -45,6 +45,7 @@ import {
 
 } from "@/components/ui/dialog"
 import { useState } from "react"
+import BalanceCell from "./BalanceCell"
 import axios from '@/actions/axios'
 import { useToast } from "@/hooks/use-toast"
 export type User = {
@@ -128,99 +129,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data = [] }) => {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => {
-        const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-        const [tempMoney, setTempMoney] = React.useState(row.original.balance);
-        const originalMoney = React.useRef(row.original.balance);
-    
-        const updateMoney = async (newValue: number) => {
-          try {
-            const token = localStorage.getItem('token');
-            await axios.post(
-              '/api/v1/user/updateMoney',
-              { userId: row.original.id, balance: newValue },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-    
-            const newData = [...tableData];
-            newData[row.index].balance = newValue;
-            setTableData(newData);
-            
-            toast({
-              title: "金錢已更新",
-              description: "金錢已成功更新",
-            });
-          } catch (error) {
-            console.error('Failed to update money:', error);
-            toast({
-              title: "更新失敗",
-              description: "請檢查網路連線或稍後再試",
-            });
-          } finally {
-            setIsDialogOpen(false);
-          }
-        };
-    
-        const handleInputChange = (value: string) => {
-          // 只允許數字和空值
-          if (/^\d*$/.test(value)) {
-            setTempMoney(Number(value));
-          }
-        };
-    
-        return (
-          <>
-            <div 
-              className="cursor-pointer" 
-              onClick={() => {
-                originalMoney.current = row.original.balance;
-                setTempMoney(row.original.balance);
-                setIsDialogOpen(true);
-              }}
-            >
-              ${row.original.balance.toLocaleString()}
-            </div>
-    
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>編輯金額</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <Input
-                    value={tempMoney.toString()}
-                    onChange={(e) => handleInputChange(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        updateMoney(tempMoney);
-                      }
-                    }}
-                    autoFocus
-                  />
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setTempMoney(originalMoney.current);
-                      setIsDialogOpen(false);
-                    }}
-                  >
-                    取消
-                  </Button>
-                  <Button onClick={() => updateMoney(tempMoney)}>
-                    確認
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </>
-        );
-      },
+      cell: ({ row }) => <BalanceCell row={row} />,
     },
 
     {

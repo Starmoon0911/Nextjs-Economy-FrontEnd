@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useAuth } from "@/context/useAuth"
 import { useToast } from "@/hooks/use-toast"
 import axios from '@/actions/axios'
-import { BackEndUrl } from "@/lib/utils"
 
 export default function UserSettings() {
     const [originalUsername, setOriginalUsername] = useState("")
@@ -22,11 +21,10 @@ export default function UserSettings() {
     const [image, setImage] = useState<string | null>(null)
     const usernameInputRef = useRef<HTMLInputElement | null>(null)
     const { isLogged, user } = useAuth()
-    const { username, email, avatarURL } = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : {
-        username: "",
-        email: "",
-        avatarURL: ""
-    };
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [avatarURL, setAvatarURL] = useState("");
+
     const { toast } = useToast()
 
     // 修正型別
@@ -37,11 +35,22 @@ export default function UserSettings() {
         width: 50,
         height: 50,
     })
-
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            try {
+                const { username, email, avatarURL } = JSON.parse(storedUser);
+                setUsername(username);
+                setEmail(email);
+                setAvatarURL(avatarURL);
+            } catch (error) {
+                console.error("Error parsing user data:", error);
+            }
+        }
+    }, []);
     useEffect(() => {
         if (username) setOriginalUsername(username)
     }, [username]);
-
     const handleUsernameClick = () => {
         setEditingUsername(originalUsername)
         setTimeout(() => usernameInputRef.current?.focus(), 0)
