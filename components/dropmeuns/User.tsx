@@ -71,8 +71,8 @@ export function UserDropMeun() {
                             Log out
                         </DropdownMenuItem>
                     ) : (
-                        <DropdownMenuItem>
-                            <Link href={'/auth/login'}>Log in</Link>
+                        <DropdownMenuItem onClick={() => window.location.href = '/auth/login'}>
+                            Log in
                         </DropdownMenuItem>
                     )}
                 </DropdownMenuContent>

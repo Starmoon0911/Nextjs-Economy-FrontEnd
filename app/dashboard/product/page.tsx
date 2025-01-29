@@ -57,7 +57,7 @@ function ProductList() {
             setProducts(prodcuts.data);
         };
         fetchProducts();
-    }, []);
+    }, [isAdmin]);
 
     // useEffect(() => {
     //     setTimeout(() => {

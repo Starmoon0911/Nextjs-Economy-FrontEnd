@@ -28,9 +28,9 @@ export default function UserSetting() {
     run();
   }, []);
   useEffect(() => {
+    if(!isAdmin) return;
     const fetchUser = async () => {
       try {
-        if(!isAdmin) return;
         // 請求用戶資料
         const response = await axios.get('/api/v1/user/');
         const users = response.data.data; // 假設 `response.data.data` 是一個用戶陣列
@@ -58,7 +58,7 @@ export default function UserSetting() {
     };
 
     fetchUser();
-  }, []);
+  }, [isAdmin == true]);
 
   return (
     <CreateNewDashboardPage>

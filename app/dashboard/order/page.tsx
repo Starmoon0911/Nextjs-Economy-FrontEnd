@@ -107,7 +107,7 @@ const Dashboard = () => {
     };
 
     fetchOrders();
-  }, []);
+  }, [isAdmin]);
 
   const markAsCompleted = async (orderId: string) => {
     if (!isAdmin) return;

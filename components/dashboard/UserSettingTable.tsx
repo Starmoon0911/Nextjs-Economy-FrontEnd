@@ -118,7 +118,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data = [] }) => {
       },
     },
     {
-      accessorKey: "balance", // 修改這裡
+      accessorKey: "balance",
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -129,62 +129,96 @@ export const DataTable: React.FC<DataTableProps> = ({ data = [] }) => {
         </Button>
       ),
       cell: ({ row }) => {
-        const [editing, setEditing] = React.useState(false);
-        const [money, setMoney] = React.useState(row.getValue<number>("balance")); // 修改這裡
-        const updateMoney = async () => {
+        const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+        const [tempMoney, setTempMoney] = React.useState(row.original.balance);
+        const originalMoney = React.useRef(row.original.balance);
+    
+        const updateMoney = async (newValue: number) => {
           try {
             const token = localStorage.getItem('token');
-            // 添加 Authorization 標頭  
             await axios.post(
-              `/api/v1/user/updateMoney`,
-              { userId: row.original.id, balance: money }, // 請求體
+              '/api/v1/user/updateMoney',
+              { userId: row.original.id, balance: newValue },
               {
                 headers: {
-                  Authorization: `Bearer ${token}`, // 正確位置
+                  Authorization: `Bearer ${token}`,
                 },
               }
             );
-
-            const newData = [...tableData]
-            newData[row.index].balance = money as number;
-            setTableData(newData)
+    
+            const newData = [...tableData];
+            newData[row.index].balance = newValue;
+            setTableData(newData);
+            
             toast({
               title: "金錢已更新",
               description: "金錢已成功更新",
             });
-            setEditing(false); // 結束編輯模式
           } catch (error) {
             console.error('Failed to update money:', error);
             toast({
               title: "更新失敗",
               description: "請檢查網路連線或稍後再試",
             });
+          } finally {
+            setIsDialogOpen(false);
           }
         };
-        //todo: unfocus when click outside
-        return editing ? (
-          <div className="flex items-center">
-            <Input
-              type="number"
-              value={money}
-              
-              onChange={(e) => setMoney(Number(e.target.value))}
-              className="max-w-xs"
-            />
-            <Button variant="outline"  onClick={updateMoney}>
-              確定
-            </Button>
-            <Button variant="outline" onClick={() => setEditing(false)}>
-              取消
-            </Button>
-          </div>
-        ) : (
-          <div
-            className="cursor-pointer"
-            onClick={() => setEditing(true)}
-          >
-            ${`${money}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-          </div>
+    
+        const handleInputChange = (value: string) => {
+          // 只允許數字和空值
+          if (/^\d*$/.test(value)) {
+            setTempMoney(Number(value));
+          }
+        };
+    
+        return (
+          <>
+            <div 
+              className="cursor-pointer" 
+              onClick={() => {
+                originalMoney.current = row.original.balance;
+                setTempMoney(row.original.balance);
+                setIsDialogOpen(true);
+              }}
+            >
+              ${row.original.balance.toLocaleString()}
+            </div>
+    
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>編輯金額</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <Input
+                    value={tempMoney.toString()}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        updateMoney(tempMoney);
+                      }
+                    }}
+                    autoFocus
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setTempMoney(originalMoney.current);
+                      setIsDialogOpen(false);
+                    }}
+                  >
+                    取消
+                  </Button>
+                  <Button onClick={() => updateMoney(tempMoney)}>
+                    確認
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
         );
       },
     },

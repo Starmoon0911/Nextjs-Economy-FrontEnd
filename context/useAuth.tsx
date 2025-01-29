@@ -52,7 +52,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // 驗證 token 並獲取 userId
             const validateResponse = await axios.post("/api/v1/auth/validate", { token });
             const userId = validateResponse.data.data?.userId;
-
             if (userId) {
                 localStorage.setItem("expTime", new Date().toISOString());
                 await fetchUser(userId); // 根據 userId 獲取詳細資料
