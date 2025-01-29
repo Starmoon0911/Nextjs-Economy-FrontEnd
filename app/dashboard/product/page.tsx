@@ -17,6 +17,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter }
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { truncateText } from "@/lib/utils";
 import { deleteProductRequest } from "@/actions/dashboard/deleteProduct";
+import { useAuth } from "@/context/useAuth";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -35,9 +36,22 @@ function ProductList() {
     const [confirmButtonVisibility, setConfirmButtonVisibility] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const { toast } = useToast();
+    const { checkPermission } = useAuth();
+    useEffect(() => {
+        const run = async () => {
+            const result = await checkPermission();
+            setIsAdmin(result);
+            if (!result) {
+                window.location.href = "/";
+            }
+        };
+        run();
+    }, []);
     useEffect(() => {
         const fetchProducts = async () => {
+            if(!isAdmin) return;
             const prodcuts = await getProducts({});
             console.log(prodcuts);
             setProducts(prodcuts.data);
@@ -53,7 +67,7 @@ function ProductList() {
 
     const handleDelete = async (productId: string) => {
         const result = await deleteProductRequest(productId);
-
+        if(!isAdmin) return;
         // 根據返回的結果顯示對應的 Toast
         if (result === 'no token') {
             toast({

@@ -9,6 +9,7 @@ interface AuthContextType {
     user: any;
     register: (email: string, password: string, username: string) => void;
     fetchUser: (userId: string) => void;
+    checkPermission: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,7 +18,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [isLogged, setIsLogged] = useState(false);
     const [user, setUser] = useState<any>(null);
     const { toast } = useToast();
-
+    
+    const checkPermission = async () => {
+        const token = localStorage.getItem("token");
+        if(!token) return false;
+        const response = await axios.post("/api/v1/auth/validate", { token });
+        return response.data?.role === "admin";
+    }
     useEffect(() => {
         const validateTokenAndFetchUser = async () => {
             const token = localStorage.getItem("token");
@@ -134,7 +141,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLogged, login, logout, register, fetchUser }}>
+        <AuthContext.Provider value={{ user, isLogged, login, logout, register, fetchUser,checkPermission }}>
             {children}
         </AuthContext.Provider>
     );

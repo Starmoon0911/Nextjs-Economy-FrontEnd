@@ -4,7 +4,7 @@ import { DataTable } from '@/components/dashboard/UserSettingTable';
 import { CreateNewDashboardPage } from '@/components/dashboard/CreateNewDashboardPage';
 import { Page } from '@/components/dashboard/Page';
 import axios from '@/actions/axios';
-
+import { useAuth } from '@/context/useAuth';
 export default function UserSetting() {
   interface userProps {
     id: string;
@@ -15,16 +15,28 @@ export default function UserSetting() {
     balance: number;
   }
   const [user, setUser] = useState<userProps[]>([]);
-
+  const [isAdmin, setisAdmin] = useState<boolean>(false);
+  const { checkPermission } = useAuth();
+  useEffect(() => {
+    const run = async () => {
+      const result = await checkPermission();
+      setisAdmin(result);
+      if (!result) {
+        window.location.href = "/";
+      }
+    }
+    run();
+  }, []);
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        if(!isAdmin) return;
         // 請求用戶資料
         const response = await axios.get('/api/v1/user/');
         const users = response.data.data; // 假設 `response.data.data` 是一個用戶陣列
 
         const enrichedUsers = await Promise.all(
-          users.map(async (user:userProps) => {
+          users.map(async (user: userProps) => {
             const userOrders = await axios.get(`/api/v1/order/getUserOrder?id=${user.id}`);
             return {
               id: user.id,
@@ -59,3 +71,4 @@ export default function UserSetting() {
     </CreateNewDashboardPage>
   );
 }
+

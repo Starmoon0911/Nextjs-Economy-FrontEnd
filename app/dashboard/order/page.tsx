@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import { useAuth } from '@/context/useAuth';
 interface Order {
   _id: string;
   userId: string;
@@ -45,9 +45,21 @@ const Dashboard = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [sortKey, setSortKey] = useState<'quantity' | 'isCompleted'>('quantity');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const { checkPermission } = useAuth();
+  useEffect(() => {
+    const run = async () => {
+      const result = await checkPermission();
+      setIsAdmin(result);
+      if (!result) {
+        window.location.href = "/";
+      }
+    }
+    run();
+  }, []);
   useEffect(() => {
     const fetchOrders = async () => {
+      if(!isAdmin) return;
       setLoading(true);
       try {
         const { data } = await axios.get('/api/v1/order/get');
@@ -98,6 +110,7 @@ const Dashboard = () => {
   }, []);
 
   const markAsCompleted = async (orderId: string) => {
+    if (!isAdmin) return;
     try {
       const token = localStorage.getItem('token');
       await axios.post(`/api/v1/order/complet`, { OrderId: orderId }, {
