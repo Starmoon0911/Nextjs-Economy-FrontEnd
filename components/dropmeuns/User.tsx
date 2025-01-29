@@ -63,9 +63,12 @@ export function UserDropMeun() {
                         </DropdownMenuSub>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => window.location.href = '/user/setting'}>
+                        帳戶設定
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => window.location.href = '/orders'}>
-                            購物車
-                        </DropdownMenuItem>
+                        購物車
+                    </DropdownMenuItem>
                     {isLogged ? (
                         <DropdownMenuItem onClick={() => logout()} className="bg-red-500 text-white">
                             Log out
