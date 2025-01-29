@@ -35,22 +35,32 @@ export default function UserSettings() {
         width: 50,
         height: 50,
     })
+
+    // 監聽 localStorage 更新
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            try {
-                const { username, email, avatarURL } = JSON.parse(storedUser);
-                setUsername(username);
-                setEmail(email);
-                setAvatarURL(avatarURL);
-            } catch (error) {
-                console.error("Error parsing user data:", error);
+        const fetchUser = () => {
+            const storedUser = localStorage.getItem("user");
+            if (storedUser) {
+                try {
+                    const { username, email, avatarURL } = JSON.parse(storedUser);
+                    setOriginalUsername(username);
+                    setEmail(email);
+                    setAvatarURL(avatarURL);
+                } catch (error) {
+                    console.error("Error parsing user data:", error);
+                }
             }
-        }
+        };
+        fetchUser();
+
+        // 監聽 localStorage 變更
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "user") fetchUser();
+        };
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
-    useEffect(() => {
-        if (username) setOriginalUsername(username)
-    }, [username]);
+
     const handleUsernameClick = () => {
         setEditingUsername(originalUsername)
         setTimeout(() => usernameInputRef.current?.focus(), 0)
@@ -58,33 +68,28 @@ export default function UserSettings() {
 
     const updateUsername = async (newUsername: string) => {
         try {
-            const token = localStorage.getItem("token"); // 從 localStorage 獲取 token
+            const token = localStorage.getItem("token");
             const response = await axios.post(
                 "/api/v1/user/updateusername",
-                {
-                    userId: user.id, // 這裡需要你的使用者 ID
-                    username: newUsername,
-                },
-                {
-                    headers: {
-                        Authorization: `Beazer ${token}`, // 把 token 放在 header 的 Authorization 欄位
-                    },
-                }
+                { userId: user.id, username: newUsername },
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             if (response.status === 200) {
                 toast({ description: "使用者名稱更新成功！" });
+
+                // 更新 localStorage
+                const storedUser = localStorage.getItem("user");
+                if (storedUser) {
+                    const updatedUser = { ...JSON.parse(storedUser), username: newUsername };
+                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                }
+
                 setOriginalUsername(newUsername);
-                window.location.reload();
             }
         } catch (error) {
-            if (error.response.status > 299 || error.response.status < 499) {
-                toast({ description: "更新失敗，請稍後再試！", variant: "destructive" });
-                console.log(error.response);
-            } else {
-                toast({ description: "伺服器錯誤，請稍後再試！", variant: "destructive" });
-                console.error(error.response);
-            }
+            toast({ description: "更新失敗，請稍後再試！", variant: "destructive" });
+            console.error(error);
         }
     };
 
@@ -108,34 +113,36 @@ export default function UserSettings() {
         const file = e.target.files?.[0]
         if (file) {
             const reader = new FileReader()
-            reader.onload = () => setImage(reader.result as string) // 確保是 string
+            reader.onload = () => setImage(reader.result as string)
             reader.readAsDataURL(file)
         }
     }
 
-    // 在 UserSettings 內新增上傳頭像的功能
     const handleSaveAvatar = async () => {
         if (image) {
             try {
-                const token = localStorage.getItem("token"); // 從 localStorage 獲取 token
+                const token = localStorage.getItem("token");
                 const formData = new FormData();
-                const file = dataURLtoFile(image, "avatar.png"); // 將 base64 轉為 File
+                const file = dataURLtoFile(image, "avatar.png");
                 formData.append("avatar", file);
 
                 const response = await axios.post(
                     "/api/v1/user/avatar",
                     formData,
-                    {
-                        headers: {
-                            Authorization: `Beazer ${token}`,
-                            "Content-Type": "multipart/form-data", // 設定為多部分表單資料
-                        }
-                    }
+                    { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
                 );
 
                 if (response.status === 200) {
                     toast({ description: "頭像更新成功！" });
-                    setAvatar(response.data.avatarURL); // 更新頭像URL
+
+                    // 更新 localStorage
+                    const storedUser = localStorage.getItem("user");
+                    if (storedUser) {
+                        const updatedUser = { ...JSON.parse(storedUser), avatarURL: response.data.avatarURL };
+                        localStorage.setItem("user", JSON.stringify(updatedUser));
+                    }
+
+                    setAvatarURL(response.data.avatarURL);
                     setOpen(false);
                 }
             } catch (error) {
@@ -145,19 +152,15 @@ export default function UserSettings() {
         }
     };
 
-    // 將 base64 轉換為 File
     const dataURLtoFile = (dataURL: string, filename: string) => {
         const arr = dataURL.split(",");
         const mime = arr[0].match(/:(.*?);/)?.[1] || "";
         const bstr = atob(arr[1]);
         let n = bstr.length;
         const u8arr = new Uint8Array(n);
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
         return new File([u8arr], filename, { type: mime });
     };
-
 
     const updatePassword = async () => {
         if (newPassword !== confirmPassword) {
@@ -186,6 +189,7 @@ export default function UserSettings() {
                 setCurrentPassword("");
                 setNewPassword("");
                 setConfirmPassword("");
+
             }
         } catch (error) {
             if (error.response.status === 401) {
@@ -216,7 +220,7 @@ export default function UserSettings() {
                         name={originalUsername}
                         round={true}
                         size="80"
-                        src={avatarURL}
+                        src={avatarURL ? `${avatarURL}?t=${Date.now()}` : undefined}
                         onClick={() => setOpen(true)}
                     />
                 </div>
